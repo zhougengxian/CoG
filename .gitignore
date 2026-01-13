@@ -1,0 +1,9 @@
+KB/
+KB_*/
+__pycache__
+logs/
+CoG/results/
+CoG/results_*/
+*.log
+logs_*/
+.env
