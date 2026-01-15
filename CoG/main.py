@@ -399,7 +399,7 @@ def main():
         experiment_name=f"{args.dataset}_{args.model}_{args.embedding_model.split('/')[-1]}",
         model_config=vars(args),
         dataset_name=args.dataset,
-        description="Full run of the PST agent on the development set. KG display truncated.",
+        description="Full run of the CoG agent on the development set. KG display truncated.",
         resume_from_id=resume_run_id,
         tag=args.tag,
         base_dir=args.result_dir

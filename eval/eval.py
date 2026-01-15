@@ -13,7 +13,7 @@ if __name__ == '__main__':
     # Allow specifying either a direct file path or an experiment ID folder
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--output_file", type=str, help="The path to the output file (e.g., summary_light_results.json).")
-    group.add_argument("--experiment_id", type=str, help="The experiment ID (folder name) to evaluate. Assumes new format in ../PST/results.")
+    group.add_argument("--experiment_id", type=str, help="The experiment ID (folder name) to evaluate. Assumes new format in ../CoG/results.")
 
     parser.add_argument("--data_question_string", type=str,
                         default='question', help="key to access the question in output.")
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     if args.experiment_id:
         # This assumes the script is run from the 'eval/' directory or project root in a way that this relative path works.
         # Let's make it more robust by anchoring from the script's own location.
-        output_file_path = os.path.join(os.path.dirname(__file__), "..", "PST", "results", args.experiment_id, "summary_light_results.json")
+        output_file_path = os.path.join(os.path.dirname(__file__), "..", "CoG", "results", args.experiment_id, "summary_light_results.json")
         print(f"Info: Evaluating experiment ID '{args.experiment_id}'. Using result file: {output_file_path}")
 
     try:

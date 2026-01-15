@@ -69,13 +69,13 @@ Before running experiments, you need to deploy the Wikidata query service. See d
 
 ### 3. Run Experiments
 
-Navigate to the PST directory and run experiments on your chosen dataset:
+Navigate to the CoG directory and run experiments on your chosen dataset:
 
 ```bash
-cd PST
+cd CoG
 CUDA_VISIBLE_DEVICES=0 python main.py --dataset hotpot_e
 ```
-For detailed parameter descriptions and usage examples, see [`PST/README.md`](PST/README.md).
+For detailed parameter descriptions and usage examples, see [`CoG/README.md`](CoG/README.md).
 
 ### 4. Evaluate Results
 
@@ -121,7 +121,7 @@ CoG employs a cognitive reasoning cycle consisting of four main stages:
 
 ## 📖 Documentation
 
-- **[PST/README.md](PST/README.md)**: Detailed usage guide for running experiments
+- **[CoG/README.md](CoG/README.md)**: Detailed usage guide for running experiments
 - **[Wikidata/README.md](Wikidata/README.md)**: Complete guide for deploying Wikidata service
 - **[eval/README.md](eval/README.md)**: Instructions for evaluating results
 
