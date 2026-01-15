@@ -1,0 +1,41 @@
+{
+    "total_questions_processed": 1430,
+    "performance_stats": {
+        "turns_per_question": {
+            "average": "1.37",
+            "min": 0,
+            "max": 4,
+            "distribution": {
+                "1": 1188,
+                "4": 135,
+                "2": 79,
+                "3": 23,
+                "0": 5
+            }
+        }
+    },
+    "reliability_stats": {
+        "wiki_failures": {
+            "count": 0,
+            "rate": "0.00%",
+            "failed_question_ids": []
+        },
+        "llm_failures": {
+            "total_errors": 0,
+            "unique_error_types": 0,
+            "error_details": {}
+        }
+    },
+    "reasoning_flow_stats": {
+        "exit_reason_counts": {
+            "COMPLETED_SUCCESSFULLY": 1298,
+            "COMPLETED_BY_MAX_TURNS": 127,
+            "COMPLETED_AFTER_FAILURE": 5
+        },
+        "exit_reason_distribution": {
+            "COMPLETED_SUCCESSFULLY": "90.77%",
+            "COMPLETED_BY_MAX_TURNS": "8.88%",
+            "COMPLETED_AFTER_FAILURE": "0.35%"
+        }
+    }
+}

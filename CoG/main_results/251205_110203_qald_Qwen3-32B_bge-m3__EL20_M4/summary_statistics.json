@@ -1,0 +1,53 @@
+{
+    "total_questions_processed": 333,
+    "performance_stats": {
+        "turns_per_question": {
+            "average": "1.96",
+            "min": 1,
+            "max": 4,
+            "distribution": {
+                "1": 189,
+                "4": 78,
+                "2": 45,
+                "3": 21
+            }
+        }
+    },
+    "reliability_stats": {
+        "wiki_failures": {
+            "count": 0,
+            "rate": "0.00%",
+            "failed_question_ids": []
+        },
+        "llm_failures": {
+            "total_errors": 1,
+            "unique_error_types": 1,
+            "error_details": {
+                "BadRequestError('Error code: 400 - {\\'error\\': {\\'message\\': \"This model\\'s maximum context length is 40960 tokens. However, your request has 51235 input tokens. Please reduce the length of the input messages. None\", \\'type\\': \\'BadRequestError\\', \\'param\\': None, \\'code\\': 400}}')": {
+                    "count": 1,
+                    "question_ids": [
+                        41
+                    ]
+                }
+            }
+        }
+    },
+    "reasoning_flow_stats": {
+        "exit_reason_counts": {
+            "COMPLETED_SUCCESSFULLY": 258,
+            "COMPLETED_BY_MAX_TURNS": 72,
+            "COMPLETED_AFTER_FAILURE": 3
+        },
+        "exit_reason_distribution": {
+            "COMPLETED_SUCCESSFULLY": "77.48%",
+            "COMPLETED_BY_MAX_TURNS": "21.62%",
+            "COMPLETED_AFTER_FAILURE": "0.90%"
+        }
+    },
+    "wiki_resource_stats": {
+        "accessed_documents": {
+            "total": 779,
+            "average": "2.34"
+        }
+    }
+}
