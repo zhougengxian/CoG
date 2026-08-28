@@ -7,7 +7,7 @@ from langchain_core.vectorstores import InMemoryVectorStore
 
 from wiki.api import get_text_under_section, get_full_page_details, retrieve_wiki_page
 from wiki.workflow_text import skim_wiki_page, parse_section_extraction_result, parse_present_info_result
-from wiki.prompt import prompt_extract_from_chunks, prompt_present_info_with_table, prompt_analyze_section_with_tables, prompt_extract_from_table
+from wiki.prompt import prompt_extract_from_chunks, prompt_present_info_with_table, prompt_analyze_section_with_tables, prompt_extract_from_table, prompt_extract_from_table_verbose
 from wiki.table_api import get_wikipedia_tables
 from wiki.format import format_retrieval_trace
 from utils import generate_process
@@ -310,21 +310,31 @@ def extract_info_from_sections_with_tables(
                         full_table_str = _serialize_full_table(table_to_extract)
                         
                         # Prepare and run extraction prompt
-                        table_extraction_inputs = {
-                            'question': question, 'analysis': analysis, 'query': query,
-                            'page_title': page_title,
-                            'summary_content': summary_info or "None",
-                            'summary_reading_rationale': skim_rationale or "None provided.",
-                            'section_title': section_title,
-                            'extracted_text_info': analysis_result.get('extracted_info') or "None",
-                            'section_reading_rationale': analysis_result.get('rationale') or "None provided.",
-                            'table_name': table_name,
-                            'full_table_data': full_table_str
-                        }
+                        verbose = getattr(args, 'wiki_verbose_report', True)
+                        if verbose:
+                            prompt_extract = prompt_extract_from_table_verbose
+                            table_extraction_inputs = {
+                                'question': question, 'analysis': analysis, 'query': query,
+                                'page_title': page_title, 'summary_content': summary_info or "None",
+                                'summary_reading_rationale': skim_rationale or "None provided.",
+                                'section_title': section_title,
+                                'extracted_text_info': analysis_result.get('extracted_info') or "None",
+                                'section_reading_rationale': analysis_result.get('rationale') or "None provided.",
+                                'table_name': table_name, 'full_table_data': full_table_str
+                            }
+                        else:
+                            prompt_extract = prompt_extract_from_table
+                            table_extraction_inputs = {
+                                'question': question, 'analysis': analysis, 'query': query,
+                                'page_title': page_title, 'summary_content': summary_info or "None",
+                                'section_title': section_title,
+                                'extracted_text_info': analysis_result.get('extracted_info') or "None",
+                                'table_name': table_name, 'full_table_data': full_table_str
+                            }
 
                         table_extraction_result = generate_process(
                             step_name=f"Extract from Table '{table_name}' in Section '{section_title}'",
-                            prompt_template=prompt_extract_from_table,
+                            prompt_template=prompt_extract,
                             template_inputs=table_extraction_inputs,
                             parsing_function=parse_table_extraction_result,
                             args=args, module='wiki', max_retries=3

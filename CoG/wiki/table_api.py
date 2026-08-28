@@ -115,7 +115,7 @@ def get_wikipedia_tables(url, with_color=True, retries=3, backoff_factor=1):
     """
     headers = {
         'Connection': 'close',
-        'User-Agent': 'CoG-Bot/1.0 (Academic Research; +https://github.com/anonymous/CoGOnGraph)'
+        'User-Agent': 'CoG-Bot/1.0 (Academic Research; +https://github.com/anonymous/CoG)'
     }
     
     response = None

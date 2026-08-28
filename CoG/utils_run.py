@@ -94,8 +94,16 @@ def prepare_question_queue(dataset, logger, resume_run_id, run_unfinished=True, 
             # 2. 如果开启，添加所有未完成的问题索引
             if run_unfinished:
                 print("Searching for unfinished questions to add to the queue.")
+                if limit is not None and limit >= 0:
+                    search_end = min(len(dataset), start + limit)
+                    candidate_indices = range(start, search_end)
+                    print(f"Restricting unfinished search to chunk range [{start}, {search_end}).")
+                else:
+                    candidate_indices = range(start, len(dataset))
+                    if start > 0:
+                        print(f"Restricting unfinished search to indices >= {start}.")
                 unfinished_count = 0
-                for i in range(len(dataset)):
+                for i in candidate_indices:
                     if i not in completed_ids:
                         indices_to_run.add(i)
                         unfinished_count += 1

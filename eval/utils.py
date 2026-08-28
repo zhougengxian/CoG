@@ -7,67 +7,93 @@ def prepare_dataset_for_eval(dataset_name, output_file):
         with open('../data/cwq.json',encoding='utf-8') as f:
             datas = json.load(f)
         question_string = 'question'
+        for item in datas:
+            if 'qid_topic_entity' in item and item['qid_topic_entity']:
+                 item['entities'] = item['qid_topic_entity']
+            elif 'topic_entity' in item:
+                 item['entities'] = item['topic_entity']
     elif dataset_name == 'qald':
         with open('../data/qald_10-en.json', encoding='utf-8') as f:
             datas = json.load(f)
         question_string = 'question'
-    elif dataset_name == 'grailqa':
-        with open('../data/grailqa.json',encoding='utf-8') as f:
-            datas = json.load(f)
-        question_string = 'question'
-    elif dataset_name == 'simpleqa':
-        with open('../data/SimpleQA.json',encoding='utf-8') as f:
-            datas = json.load(f)    
-        question_string = 'question'
-    elif dataset_name == 'webquestions':
-        with open('../data/WebQuestions.json',encoding='utf-8') as f:
-            datas = json.load(f)
-        question_string = 'question'
-    elif dataset_name == 'trex':
-        with open('../data/T-REX.json',encoding='utf-8') as f:
-            datas = json.load(f)
-        question_string = 'input'    
-    elif dataset_name == 'zeroshotre':
-        with open('../data/Zero_Shot_RE.json',encoding='utf-8') as f:
-            datas = json.load(f)
-        question_string = 'input'    
-    elif dataset_name == 'creak':
-        with open('../data/creak.json',encoding='utf-8') as f:
-            datas = json.load(f)
-        question_string = 'sentence'
+        for item in datas:
+             if 'qid_topic_entity' in item:
+                 item['entities'] = item['qid_topic_entity']
     elif dataset_name == 'hotpot_e':
         with open('../data/hotpotadv_dev.json', encoding='utf-8') as file:
             datas = json.load(file)
         question_string = 'question'
-    elif dataset_name == 'fin':
-        with open('../data/finkg_qa.json', encoding='utf-8') as file:
-            datas = json.load(file)
-        question_string = 'question'
+        try:
+            with open('../data/hotpotadv_entities_azure.json', encoding='utf-8') as f:
+                ent_data = json.load(f)
+            ent_map = {x.get('question'): x.get('entities', {}) for x in ent_data}
+            for item in datas:
+                q = item.get(question_string)
+                if q in ent_map:
+                    item['entities'] = ent_map[q]
+        except FileNotFoundError:
+            pass
     elif dataset_name == 'webqsp':
         with open('../data/webqsp_test.json', encoding='utf-8') as f:
             datas = json.load(f)
         question_string = 'question'
-    elif dataset_name == 'fever':
-        with open('../data/fever_1000.json', encoding='utf-8') as f:
-            datas = json.load(f)
-        question_string = 'claim'
+        for item in datas:
+             if 'qid_topic_entity' in item:
+                 item['entities'] = item['qid_topic_entity']
     elif dataset_name == '2wiki':
         with open('../data/2wikimultihopqa.json', encoding='utf-8') as f:
             datas = json.load(f)
         question_string = 'question'
+        try:
+            with open('../data/2wikimultihopqa_entities_azure.json', encoding='utf-8') as f:
+                ent_data = json.load(f)
+            ent_map = {x.get('question'): x.get('entities', {}) for x in ent_data}
+            for item in datas:
+                q = item.get(question_string)
+                if q in ent_map:
+                    item['entities'] = ent_map[q]
+        except FileNotFoundError:
+            pass
     elif dataset_name == 'KGQAGen':
         with open('../data/KGQAGen-10k.json', encoding='utf-8') as f:
             datas = json.load(f)
         question_string = 'question'
+        try:
+            with open('../data/KGQAGen-10k_entities_azure.json', encoding='utf-8') as f:
+                ent_data = json.load(f)
+            ent_map = {x.get('question'): x.get('entities', {}) for x in ent_data}
+            for item in datas:
+                q = item.get(question_string)
+                if q in ent_map:
+                    item['entities'] = ent_map[q]
+        except FileNotFoundError:
+            pass
     elif dataset_name == 'musique':
         with open('../data/musique.json', encoding='utf-8') as f:
             datas = json.load(f)
         question_string = 'question'
+        try:
+            with open('../data/musique_entities_azure.json', encoding='utf-8') as f:
+                ent_data = json.load(f)
+            ent_map = {x.get('question'): x.get('entities', {}) for x in ent_data}
+            for item in datas:
+                q = item.get(question_string)
+                if q in ent_map:
+                    item['entities'] = ent_map[q]
+        except FileNotFoundError:
+            pass
     else:
         print("dataset not found")
         exit(-1)
+    
     with open(output_file, encoding='utf-8') as f:
-        output_datas = json.load(f)
+        try:
+            output_datas = json.load(f)
+        except json.JSONDecodeError:
+            # Try reading as JSONL
+            f.seek(0)
+            output_datas = [json.loads(line) for line in f]
+            
     return datas, question_string, output_datas
 
 
@@ -80,47 +106,17 @@ def align(dataset_name, question_string, data, ground_truth_datas, origin_data=N
     if dataset_name == 'cwq':
         answers = origin_data["answer"]
         answer_list.append(answers)
-    elif dataset_name == 'grailqa':
-        answers = origin_data["answer"]
-        for answer in answers:
-            if "entity_name" in answer:
-                answer_list.append(answer['entity_name'])
-            else:
-                answer_list.append(answer['answer_argument'])
     elif dataset_name == '2wiki' or dataset_name == 'KGQAGen' or dataset_name == 'musique':
         answer_list = origin_data["answer"]
     elif dataset_name == 'qald':
         answers = origin_data["answer"]
         for answer in answers:
             answer_list.append(answers[answer])
-    elif dataset_name == 'simpleqa':
-        answers = origin_data["answer"]
-        answer_list.append(answers)
     elif dataset_name == 'hotpot_e':
         answers = origin_data["answer"]
         answer_list.append(answers)
-    elif dataset_name == 'fever':
-        answer = origin_data['label']
-        possible_answer_dict = {
-            'REFUTES': ['refutes', 'refute', 'false', 'incorrect', 'not accurate', 'not true', 'not correct',
-                        'does not make sense', 'not entirely accurate', 'incomplete'],
-            'SUPPORTS': ['supports', 'support', 'true', 'correct'],
-            'NOT ENOUGH INFO': ['not enough information', 'not enough info']
-        }
-        alt_ans = possible_answer_dict[answer]
-        answer_list.append(answer)
-        for ans in alt_ans:
-            answer_list.append(ans)
     elif dataset_name == 'webqsp':
         answer_list = origin_data["answers"]
-    elif dataset_name == 'trex' or dataset_name == 'zeroshotre':
-        answers = origin_data["answer"]
-        answer_list.append(answers)
-    elif dataset_name == 'fin':
-        answer_list = origin_data["answer"]
-    elif dataset_name == 'creak':
-        answer = origin_data['label']
-        answer_list.append(answer)
 
 
 

@@ -440,7 +440,7 @@ Selected Tables: A Python-style list of the exact names of tables that seem rele
 ### YOUR RESPONSE:
 ''')
 
-prompt_extract_from_table = Template('''\
+prompt_extract_from_table_verbose = Template('''\
 ### ROLE
 You are a meticulous research agent. Your task is to perform a detailed analysis of a single, complete Wikipedia table to extract information that supplements findings from the section's text.
 
@@ -462,6 +462,40 @@ You have already extracted some information from the text of a Wikipedia section
 - **Current Section Under Analysis:** "${section_title}"
 - **Information Extracted from Section Text:** ${extracted_text_info}
 - **Rationale for Analyzing this Section:** ${section_reading_rationale}
+
+### TABLE FOR ANALYSIS
+- **Table Name:** "${table_name}"
+- **Table Data:**
+${full_table_data}
+
+### OUTPUT FORMAT
+Based on the information above, provide your response in the following format.
+
+Rationale: Explain what new, relevant information you found in the table and how it supplements, refines, or corrects the text-based findings. If the table is not useful or only contains redundant information, state that clearly.
+Extracted Table Info: The new information or facts extracted from the table. Do not include any explanations here. If the table provides no new, relevant information, state None.
+
+### YOUR RESPONSE:
+''')
+
+
+prompt_extract_from_table = Template('''\
+### ROLE
+You are a meticulous research agent. Your task is to perform a detailed analysis of a single, complete Wikipedia table to extract information that supplements findings from the section's text.
+
+### TASK
+You have already extracted some information from the text of a Wikipedia section. Now, you are analyzing the full data of a table that you previously identified as promising. Your goal is to extract new information that addresses the **Current Search Query** or provides crucial context for the overall **Original Question**. The information you extract should **supplement, refine, or correct** the information already found in 'Previously Extracted Information' section. Avoid extracting information that is redundant or already covered.
+
+### CONTEXT
+#### 1. Overall Objective
+- **Original Question:** ${question}
+- **Overall Plan (Analysis):** ${analysis}
+- **Current Search Query:** "${query}"
+
+#### 2. Previously Extracted Information
+- **Wikipedia Page Explored:** "${page_title}"
+- **Information Extracted from page summary:** ${summary_content}
+- **Current Section Under Analysis:** "${section_title}"
+- **Information Extracted from Section Text:** ${extracted_text_info}
 
 ### TABLE FOR ANALYSIS
 - **Table Name:** "${table_name}"

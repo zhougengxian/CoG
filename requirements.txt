@@ -19,3 +19,5 @@ html5lib
 tabulate
 
 httpx[socks]
+python-dotenv
+psutil

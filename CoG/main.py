@@ -121,7 +121,7 @@ def run_full_workflow(question, args, client, embeddings):
                 if retrieval_result.get("page_title"):
                     accessed_wiki_pages.add(retrieval_result.get("page_title"))
                 
-                formatted_wiki_result = format_wikipedia_retrieval(query, entity, retrieval_result, args)
+                formatted_wiki_result = format_wikipedia_retrieval(query, entity, retrieval_result, args, verbose=getattr(args, 'wiki_verbose_report', True))
                 
                 turn_results.append({
                     "query": query,
@@ -322,7 +322,7 @@ def main():
     parser.add_argument("--dataset", type=str,
                         default="hotpot_e", help="choose the dataset.")
     parser.add_argument("--base_url", type=str,
-                        default='http://127.0.0.1:9034/v1',
+                        default='http://127.0.0.1:9040/v1',
                         help="if the LLM_type is qwen, you need add your own openai api keys.")
     # ['Qwen3-32B', 'gemini-2.5-flash', 'gpt-4.1']
     parser.add_argument("--model", type=str, default='Qwen3-32B', help="base LLM model.")
@@ -335,8 +335,11 @@ def main():
     parser.add_argument("--max_length_entity_link", type=int, default=None, help="the max length of entity link LLMs output.")
     parser.add_argument("--max_length_plan", type=int, default=None, help="the max length of plan LLMs output.")
     parser.add_argument("--max_length_relation_discovery", type=int, default=None, help="the max length of relation discovery LLMs output.")
-    parser.add_argument("--max_display_facts", type=int, default=1200, help="Maximum number of facts to display for an entity during KG fact pruning.")
-    parser.add_argument("--fact_pruning_retries", type=int, default=5, help="the max number of retries for fact pruning in kg exploration.")
+    parser.add_argument("--max_display_facts", type=int, default=1500, help="Maximum number of facts to display for an entity during KG fact pruning.")
+    parser.add_argument("--fact_pruning_retries", type=int, default=5, help="the max number of retries for fact pruning/extraction in kg exploration.")
+    parser.add_argument("--kg_prune_method", type=str, default="filter", choices=["filter", "extract"], help="Method for processing retrieved KG facts: 'filter' for strict JSON filtering (original), 'extract' for text-based information extraction.")
+    parser.add_argument("--kg_verbose_report", action=argparse.BooleanOptionalAction, default=False, help="Whether to include debug info (candidates, reasoning, summary) in the KG report.")
+    parser.add_argument("--wiki_verbose_report", action=argparse.BooleanOptionalAction, default=False, help="Include detailed LLM rationales and traces in Wikipedia outputs.")
     parser.add_argument("--plan_retries", type=int, default=5, help="the max number of retries for initial planning.")
     parser.add_argument("--kg_top_k", type=int, default=20, help="the top k candidates for entity linking in kg exploration.")
     parser.add_argument("--entity_link_method", type=str, default="analysis", choices=["simple", "advanced", "analysis"], help="Version of prompt for entity linking.")
@@ -358,6 +361,9 @@ def main():
     parser.add_argument("--wikipedia_method", type=str, default="with_tables", 
                         choices=["text_only", "with_tables", "full_section"], 
                         help="Choose the version of retrieve_info_wikipedia function: 'text_only' for basic version, 'with_tables' for version with table support (default).")
+    parser.add_argument("--synthesis_method", type=str, default="extract_and_judgment", 
+                        choices=["extract_and_judgment", "evaluate_and_extract"], 
+                        help="Choose the version of prompt for synthesis: 'extract_and_judgment' for basic verbatim extraction (default), 'evaluate_and_extract' for the advanced evaluation and extraction version.")
     parser.add_argument("--max_page_retrieval_interactions", type=int, default=6, help="the max number of interactions for retrieve_wiki_page.")
     parser.add_argument("--section_chunks", type=int, default=3, help="The number of top relevant chunks to retrieve from each section.")
     parser.add_argument("--tag", type=str, default=None, help="A custom tag to append to the experiment ID for easy identification.")

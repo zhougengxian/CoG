@@ -13,6 +13,8 @@ from wiki.prompt import (
 from utils import generate_process
 
 wikipedia.wikipedia.API_URL = "https://en.wikipedia.org/w/api.php"
+wikipedia.set_user_agent("CoG/1.0 (user@example.com)")
+
 def query_wikipedia_api(query: str, lang: str = "en", retries: int = 3, backoff_factor: float = 1):
     """
     一个基于 `wikipedia-api` 库重构的、为程序或大模型设计的维基百科查询API函数。
@@ -37,7 +39,7 @@ def query_wikipedia_api(query: str, lang: str = "en", retries: int = 3, backoff_
         try:
             # 1. 初始化 wikipedia-api 对象，设置 User-Agent 是一个好习惯
             wiki_api = wikipediaapi.Wikipedia(
-                user_agent="CoG-Bot/1.0 (Academic Research; +https://github.com/anonymous/CoGOnGraph)",
+                user_agent="CoG-Bot/1.0 (Academic Research; +https://github.com/anonymous/CoG)",
                 language=lang,
                 # extract_format=wikipediaapi.ExtractFormat.WIKI  # 获取纯文本内容
             )
@@ -69,6 +71,13 @@ def query_wikipedia_api(query: str, lang: str = "en", retries: int = 3, backoff_
             # print(f"Success: Found page '{page_title}'.")
             # 4. 成功找到页面
             return ("SUCCESS", page)
+
+        except KeyError as e:
+            # KeyError Indicates unexpected API response format (e.g. missing 'pages')
+            # This often happens with special namespaces like 'Commons:'
+            # Retry is useless for this error
+            print(f"Error querying '{query}': KeyError (Non-network error): {e}")
+            return ("ERROR", query, f"API Response Error: {e} (Likely invalid query format/namespace for this API)")
 
         except Exception as e:
             last_exception = e
@@ -328,6 +337,9 @@ def retrieve_wiki_page(initial_entity: str, question: str, analysis: str, query:
     trace = []
     search_history = []
 
+    if not current_entity:
+        return "FAILED", "No valid entity provided for Wikipedia search.", trace
+
     for attempt in range(max_interactions):
         interaction_log = {
             "attempt": attempt + 1,
@@ -487,7 +499,11 @@ def retrieve_wiki_page(initial_entity: str, question: str, analysis: str, query:
             
         elif status == "ERROR":
             _query, error_message = result
-            reason = f"Wikipedia API error for query '{_query}': {error_message}. It may be temporary network issues. Please try again."
+            if "API Response Error" in error_message:
+                reason = f"Wikipedia API format error for query '{_query}': {error_message}. Please check if the query namespace is supported."
+            else:
+                reason = f"Wikipedia API error for query '{_query}': {error_message}. It may be temporary network issues. Please try again."
+            
             interaction_log["outcome"] = f"Failure: {reason}"
             trace.append(interaction_log)
             print(reason)

@@ -155,7 +155,7 @@ class MultiServerWikidataQueryClient:
             return final_results
 
         if method == "find_similar_entities":
-            # Only one result is expected from the first server
+            # Only one result is expected from the last server
             res = results[0]
             if isinstance(res, list):
                 return res

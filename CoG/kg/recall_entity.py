@@ -323,6 +323,11 @@ def recall_entity_from_KG(
     """
     # === 1. 候选生成 ===
     print(f"--- Stage 0: Entity Linking for '{mention}' ---")
+    
+    if not mention:
+        print("--- No valid mention provided. ---")
+        return []
+
     candidates = {}
 
     # 精确匹配

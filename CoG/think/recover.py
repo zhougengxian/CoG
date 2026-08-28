@@ -34,6 +34,7 @@ The previous approach has led to a dead end. You must critically reflect on the 
 1.  **Critical Reflection:** Based on the `Interaction History` and `FAILED TURN DETAILS`, critically analyze why the previous approach failed. Was the initial plan flawed? Were the entities wrong? Were the queries poorly formulated? Summarize the core strategic error and derive actionable **guiding principles** for the next attempt.
 2.  **Update Analysis:** Based on your reflection, propose a fundamentally new plan or direction. Your new plan should leverage insights from your reflection, potentially by promoting an entity from the `Candidate Pool`, re-examining the original question for missed keywords, or formulating queries from an entirely different angle.
 3.  **Plan Next Queries and Entities:** Based on your new analysis, define a new set of sub-queries and corresponding entities. These must represent a clear change in direction from the failed queries.
+    - If you suspect the previous failure was due to entity ambiguity, you MUST update the Next Entities to include specific disambiguation terms (e.g., "Apple (company)", "Lincoln (film)").
 4.  **Manage Candidate Pool:** Review the `Global Candidate Entities Pool` and the `FAILED TURN DETAILS`.
     a. Decide if any existing leads in the pool are now high-priority for your new strategy.
     b. Add any new promising leads if any were incidentally discovered even in the failed turn.

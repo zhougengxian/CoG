@@ -15,7 +15,6 @@ from simple_wikidata_db.db_deploy.utils import (
 import ujson as json
 from tqdm import tqdm
 import math
-from simple_wikidata_db.db_deploy.vector_search import VectorSearch
 
 def read_aliases(filename):
     qid_to_aliases = defaultdict(list)
@@ -72,12 +71,25 @@ class WikidataQueryServer:
             decode_responses=True,
             retry=redis.retry.Retry(redis.backoff.ExponentialBackoff(), 3),
         )
+        if num_chunks <= 0:
+            raise ValueError(f"num_chunks must be positive, got {num_chunks}")
+        if chunk_number < 0 or chunk_number >= num_chunks:
+            raise ValueError(
+                f"chunk_number must be in [0, {num_chunks - 1}], got {chunk_number}"
+            )
+        is_vector_search_chunk = chunk_number == num_chunks - 1
         chunk_number = chunk_number + 1
 
-        # Load vector search index only on the first chunk server
+        # Load vector search index only on the last chunk server.
         self.vector_search = None
-        if chunk_number == 6:
-            self.vector_search = VectorSearch(model_name=vector_search_model, device=vector_search_device)
+        if is_vector_search_chunk:
+            from simple_wikidata_db.db_deploy.vector_search import VectorSearch
+
+            self.vector_search = VectorSearch(
+                model_name=vector_search_model,
+                device=vector_search_device,
+                faiss_use_gpu=False,
+            )
             model_name_for_path = vector_search_model.split('/')[-1]
             index_path = os.path.join(data_dir, "indices", f"vector_index_{model_name_for_path}.faiss")
             mapping_path = os.path.join(data_dir, "indices", f"vector_index_map_{model_name_for_path}.pkl")
@@ -333,7 +345,13 @@ class WikidataQueryServer:
             while int(self.redis_conn.info('persistence').get('rdb_bgsave_in_progress', 0)):
                 print("An existing RDB save is in progress, waiting for it to complete...")
                 time.sleep(5)
-            self.redis_conn.bgsave()
+            try:
+                self.redis_conn.bgsave()
+            except redis.exceptions.ResponseError as e:
+                if "Background save already in progress" in str(e):
+                    print("Background save was triggered by another process. Skipping.")
+                else:
+                    raise e
         finally:
             print("Restoring original Redis save configuration...")
             if original_save_config and "save" in original_save_config:

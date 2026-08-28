@@ -104,6 +104,11 @@ CoG supports the following benchmark datasets:
 | AdvHotpotQA | `hotpot_e` | HotpotQA adversarial samples |
 | MusiQue | `musique` | Multi-hop reasoning QA |
 
+
+### Entity-Annotated Dataset Files
+
+Some datasets `include *_entities_azure.json` files containing the original questions and their recognized entity annotations. These files are provided as auxiliary inputs for baseline models or evaluation pipelines that benefit from explicit entity information. By default, CoG uses only the standard dataset files.
+
 ## 🔧 System Architecture
 
 CoG employs a cognitive reasoning cycle consisting of four main stages:

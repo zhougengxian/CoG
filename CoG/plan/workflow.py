@@ -37,7 +37,7 @@ def generate_init_plan(question, args, max_retries=3):
     for attempt in range(max_retries):
         print(f"--- Generating Plan for Question (Attempt {attempt + 1}/{max_retries}) ---\n")
         prompt = init_plan_prompt.substitute(question=question)
-        result_text = run_llm(prompt, args)
+        result_text, error = run_llm(prompt, args)
         if not result_text:
             print(f"Attempt {attempt + 1} failed: LLM call returned no result. Retrying in 5 seconds...")
             time.sleep(5)
@@ -45,7 +45,9 @@ def generate_init_plan(question, args, max_retries=3):
 
         result = extract_plan_result(result_text)
         if result:
-            analysis, queries, entities = result
+            analysis = result['analysis']
+            queries = result['queries']
+            entities = result['entities']
             print("Analysis:", analysis)
             print("Query:", queries)
             print("Entities:", entities)
@@ -65,7 +67,7 @@ def run_init_planning(question, args, max_retries=3):
 
     该工作流包括两个主要步骤：
     1. 生成初步计划：根据用户问题创建一个初始的、可能包含序贯步骤的计划。
-    2. 精炼计划：通过修正幻觉并移除依赖步骤，从初步计划中提取可以立即执行的、并行的第一步查询。
+    2. 精炼计划：移除初步计划中的依赖步骤，只保留可以立即执行的、并行的第一步查询。
     """
     print('=' * 25 + " Question " + '=' * 25 + "\n" + f"{question}")
     
@@ -97,8 +99,7 @@ def run_init_planning(question, args, max_retries=3):
     print(f"Entities: {initial_entities}\n")
 
     # --- 步骤 2: 精炼计划 ---
-    # 这一步旨在解决初步计划中可能存在的幻觉问题，并过滤掉当前无法执行的依赖步骤。
-    # 我们只保留那些基于原始问题可立即执行的并行查询。
+    # 准备精炼步骤的输入。filter_sequential_prompt需要字符串格式的列表。
     refine_template_inputs = {
         'question': question,
         'analysis': initial_analysis,

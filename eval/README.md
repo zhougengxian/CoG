@@ -10,7 +10,7 @@ You can evaluate the results using the `eval.py` script. There are two ways to s
 
 ### Arguments
 
-- `--dataset`: The dataset name (e.g., `hotpot_e`, `2wiki`, `cwq`, `fever`, `qald`, `creak`, `webqsp`, `zeroshotre`). Default is `hotpot_e`.
+- `--dataset`: The dataset name (e.g., `KGQAGen`, `cwq`, `qald`, `webqsp`, `2wiki`, `hotpot_e`, `musique`). Default is `hotpot_e`.
 - `--experiment_id`: The experiment ID (folder name) located in `../CoG/results`. The script will automatically look for `summary_light_results.json` inside this folder.
 - `--output_file`: The direct path to the result JSON file.
 - `--data_question_string`: The key to access the question text in the output file (default: `question`).

@@ -1,8 +1,6 @@
 import argparse
 import os
 import json
-import csv
-from datetime import datetime
 from utils import *
 
 if __name__ == '__main__':
@@ -17,6 +15,7 @@ if __name__ == '__main__':
 
     parser.add_argument("--data_question_string", type=str,
                         default='question', help="key to access the question in output.")
+    parser.add_argument("--DoG", action='store_true', help="Indicate that the output file is from the DoG format.")
     args = parser.parse_args()
 
     # Determine the correct path to the results file
@@ -55,22 +54,14 @@ if __name__ == '__main__':
         origin_data_i = ground_truth_datas_question2id[cur_question]
         answers = align(args.dataset, question_string, data, ground_truth_datas, origin_data=ground_truth_datas[origin_data_i], data_question_string=data_question_string)
 
-        results = data.get('answer', '') # Use .get for safety
+        if args.DoG:
+            results = data.get('results', '')
+        else:
+            results = data.get('answer', '') # Use .get for safety
+            
         if results is None:
             results = ''
-        if 'fever' in args.dataset:
-            if ("no entity find in depth" in data.get('remark', '') or 
-                "Last situation.Not into depth. whether it trigger" in data.get('remark', '')):
-                results = 'NOT ENOUGH INFO'
-        matched = False
-        response = results
-
-        if check_string(results):
-            if exact_match(response, answers):
-                matched = True
-        else:
-            if exact_match(response, answers):
-                matched = True
+        matched = exact_match(results, answers)
 
         if matched:
             num_right += 1
@@ -82,4 +73,3 @@ if __name__ == '__main__':
     print(f'total questions: {len(output_datas)}')
     print("Exact Match: {}".format(em_score))
     print("right: {}, error: {}".format(num_right, num_error))
-

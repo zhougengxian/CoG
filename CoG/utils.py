@@ -63,7 +63,7 @@ def run_llm(prompt, args, module='main', n=1, **generation_params):
             params['max_completion_tokens'] = max_tokens
     params.update(generation_params)
     
-    if 'Qwen3-32B' in model_name:
+    if 'Qwen3-32B' in model_name or 'Qwen3-8B' in model_name:
         if args.enable_thinking:
             params['temperature'] = 0.6
             params['top_p'] = 0.95
@@ -78,7 +78,7 @@ def run_llm(prompt, args, module='main', n=1, **generation_params):
         try:
             response = client.chat.completions.create(**params)
 
-            if 'Qwen3-32B' in model_name: # Qwen3-32B models
+            if 'Qwen3-32B' in model_name or 'Qwen3-8B' in model_name: # Qwen3-32B models
                 if n > 1:
                     for choice in response.choices:
                         if "</think>" in choice.message.content:
@@ -122,6 +122,10 @@ def generate_process(step_name: str, prompt_template: Template, template_inputs:
         if llm_error:
             last_llm_error = llm_error
             print(f"Attempt {attempt + 1} failed: LLM call returned an error. Retrying in 5 seconds...")
+            time.sleep(5)
+            continue
+        if result_text is None:
+            print(f"Attempt {attempt + 1} failed: LLM returned None response. Retrying...")
             time.sleep(5)
             continue
             

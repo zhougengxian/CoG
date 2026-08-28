@@ -1,6 +1,7 @@
 from kg.entity_link import run_entity_disambiguation, format_candidates_compact
 from kg.relation_discovery import run_relation_discovery
-from kg.fact_prune import run_fact_retrieval_and_pruning
+from kg.fact_prune_filter import run_fact_retrieval_and_pruning as run_kg_filter
+from kg.fact_prune_extract import run_fact_retrieval_and_extraction as run_kg_extract
 from kg.recall_entity import recall_entity_from_KG
 from kg.client import MultiServerWikidataQueryClient
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -78,16 +79,28 @@ def run_full_kg_exploration(
     if discovery_status != "SUCCESS":
         return f"KG Exploration FAILED for Entity: \"{link_result.get('label', entity_mention)}\"\n- **Reason:** Relation discovery failed. Detail: {discovery_result.get('reason', 'Unknown error')}"
 
-    # --- Step 3: Fact Retrieval and Pruning ---
-    pruning_status, final_report = run_fact_retrieval_and_pruning(
-        question=question, analysis=analysis, query=query,
-        entity_mention=entity_mention,
-        linked_candidates=linked_candidates,
-        linked_entity=link_result,
-        discovery_result=discovery_result,
-        client=client, args=args,
-        max_retries=args.fact_pruning_retries,
-    )
+    # --- Step 3: Fact Retrieval and Pruning/Extraction ---
+    kg_prune_method = getattr(args, 'kg_prune_method', 'filter')
+    if kg_prune_method == 'extract':
+        pruning_status, final_report = run_kg_extract(
+            question=question, analysis=analysis, query=query,
+            entity_mention=entity_mention,
+            linked_candidates=linked_candidates,
+            linked_entity=link_result,
+            discovery_result=discovery_result,
+            client=client, args=args,
+            max_retries=args.fact_pruning_retries,
+        )
+    else: # Default to filter
+        pruning_status, final_report = run_kg_filter(
+            question=question, analysis=analysis, query=query,
+            entity_mention=entity_mention,
+            linked_candidates=linked_candidates,
+            linked_entity=link_result,
+            discovery_result=discovery_result,
+            client=client, args=args,
+            max_retries=args.fact_pruning_retries,
+        )
 
     if pruning_status != "SUCCESS":
         return f"KG Exploration FAILED for Entity: \"{link_result.get('label', entity_mention)}\"\n- **Reason:** Fact pruning failed. Detail: {final_report}"

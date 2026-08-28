@@ -65,11 +65,10 @@ CUDA_VISIBLE_DEVICES=3 python main.py --dataset hotpot_e
 #### 1. Using Custom Models and Parameters
 ```bash
 CUDA_VISIBLE_DEVICES=0 python main.py \
-    --dataset musique \
+    --dataset hotpot_e \
     --model Qwen3-32B \
     --base_url http://127.0.0.1:9034/v1 \
     --embedding_model BAAI/bge-m3 \
-    --max_turns 5 \
     --tag my_experiment
 ```
 
@@ -79,6 +78,10 @@ python main.py \
     --resume_run_id 20251225_143022_hotpot_e \
     --run_unfinished
 ```
+
+## Entity-Annotated Data
+
+The project includes `*_entities_azure.json` files for several datasets. These are entity-annotated versions of the original questions, provided mainly as auxiliary inputs for baseline models or evaluation pipelines that benefit from explicit topic/entity hints. The CoG main workflow reads the standard dataset files by default.
 
 ## Main Parameters
 
@@ -109,17 +112,19 @@ python main.py \
 - `--max_length_entity_link`: Maximum output length for entity linking module
 - `--max_length_plan`: Maximum output length for planning module
 - `--max_length_relation_discovery`: Maximum output length for relation discovery module
-- `--enable_thinking`: Enable thinking mode for Qwen3-32B (disabled by default)
+- `--enable_thinking`: Enable thinking mode for Qwen3 models (disabled by default)
 
 ### Workflow Parameters
 - `--max_turns`: Maximum iteration turns (default: 4)
 - `--skip_tier1_fallback`: Skip tier-1 fallback strategy (default: False)
-- `--fact_pruning_retries`: Number of retries for KG fact pruning (default: 5)
+- `--fact_pruning_retries`: Number of retries for KG fact pruning/extraction (default: 5)
 - `--plan_retries`: Number of retries for initial planning (default: 5)
 
 ### KG-Related Parameters
 - `--kg_top_k`: Number of entity linking candidates (default: 20)
-- `--max_display_facts`: Maximum number of facts to display for an entity (default: 1200)
+- `--max_display_facts`: Maximum number of facts to display for an entity (default: 1500)
+- `--kg_prune_method`: KG fact processing method, options: `filter` for strict fact filtering and `extract` for text-style fact extraction
+- `--kg_verbose_report`: Include KG candidate previews and reasoning in downstream reports (disabled by default to reduce context length)
 - `--entity_link_method`: Entity linking method, options: `simple`, `advanced`, `analysis`
 - `--entity_link_context`: Entity linking context, options: `question_only`, `query_only`, `question_query`, `instruct`
 - `--server_urls`: Wikidata service configuration file (default: `server_urls.txt`)
@@ -131,6 +136,8 @@ python main.py \
   - `full_section`: Full section retrieval
 - `--max_page_retrieval_interactions`: Maximum interactions for Wiki page retrieval (default: 6)
 - `--section_chunks`: Number of relevant chunks to retrieve per section (default: 3)
+- `--wiki_verbose_report`: Include detailed Wikipedia retrieval rationales and traces in downstream reports (disabled by default to reduce context length)
+- `--synthesis_method`: Synthesis prompt variant, options: `extract_and_judgment` and `evaluate_and_extract`
 
 ### Resume and Rerun Parameters
 - `--resume_run_id`: Resume from a previous run ID
@@ -190,7 +197,7 @@ Complete results for each question, containing:
 - `reasoning_turns`: Number of reasoning turns used
 - `final_notebook`: Final knowledge notebook content
 - `full_interaction_history`: Complete interaction history (queries, judgments, planning for each turn)
-- `run_stats`: Run statistics (Wikipedia pages accessed, network failure flags, etc.)
+- `run_stats`: Run metadata such as Wikipedia pages accessed and network failure flags
 
 **2. Lightweight Summary File** (`summary_light_results.json`)
 Simplified results list for all questions, used for subsequent evaluation of experiment results (refer to `eval/README.md` in the project root directory for evaluation methods).
@@ -198,7 +205,7 @@ Simplified results list for all questions, used for subsequent evaluation of exp
 **3. Statistical Summary File** (`summary_statistics.json`)
 Contains overall statistical data:
 - `total_questions_processed`: Total number of questions processed
-- `performance_stats`: Performance statistics (average turns per question, distribution, etc.)
+- `performance_stats`: Reasoning turn statistics
 - `reliability_stats`: Reliability statistics (Wiki/LLM API failure rates)
 - `reasoning_flow_stats`: Reasoning flow statistics (exit type distribution)
 - `wiki_resource_stats`: Wikipedia resource usage statistics

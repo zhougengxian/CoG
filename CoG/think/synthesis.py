@@ -84,6 +84,52 @@ Judgment: SUFFICIENT, INSUFFICIENT_USEFUL, or INSUFFICIENT_USELESS.
 ### YOUR RESPONSE:
 ''')
 
+
+prompt_evaluate_and_extract = Template('''\
+### ROLE
+You are a master AI strategist leading a multi-hop question-answering mission. Your task is to synthesize retrieved information from various sources, evaluate progress against the overall plan, and decide the most logical next step.
+
+### CONTEXT
+- **Original Question:** ${question}
+- **Overall Plan (Analysis):** ${analysis}
+- **Notebook (Summary of Known Facts):**
+${notebook}
+- **Current Sub-Queries:** ${queries}
+- **Core Entities in Sub-Queries:** ${entities}
+
+### EVIDENCE
+This section contains the information retrieved from different sources for all sub-queries executed in this turn.
+${evidence_blocks}
+
+### YOUR TASK
+Carefully review all evidence, and in conjunction with the **Original Question**, your **Overall Plan**, and the **Notebook**, complete the following three steps:
+1.  **Evaluate Relevance and Redundancy (Think Step-by-Step):**  Document your evaluation of the evidence.
+    - **Relevance:** Does the evidence contain information relevant to the original question or the current sub-queries?
+    - **Redundancy:** Compare the relevant evidence against the **Notebook**. Determine if the evidence provides new information, or if it is entirely redundant.
+    - If it is relevant and new, explain how the facts help answer the question and what is still missing. Discuss the potential value of any new leads.
+    - If you conclude the evidence is irrelevant or completely duplicated, explain *why* the current sub-queries failed.
+2.  **Information Extraction:** Based on your evaluation in Step 1, meticulously extract all useful and new information from the "Evidence" section.
+    - **Direct Facts:** Core facts that directly contribute to answering the original question.
+    - **Promising Leads:** New entities or critical factual clues that do not answer the question directly but are essential for guiding the next step of the investigation.
+    - **[CRITICAL]** Summarize the useful information into clear factual statements. However, preserve the exact names of all critical entities, as well as exact numerical values and dates.
+    - **[CRITICAL]** If the evidence is irrelevant or completely redundant with the Notebook, output "None".
+    - **[CRITICAL]** This section is for **extraction only**. Do NOT include your own reasoning, hypotheses, assumptions, or inferences here.
+3.  **Make a Judgment:** Based on your analysis, make a clear judgment on the current progress. You must choose one of the following three options:
+    - `SUFFICIENT`: The accumulated information (Notebook + newly extracted facts) is adequate to generate a final, complete answer.
+    - `INSUFFICIENT_USEFUL`: Progress has been made and valuable clues have been found, but more information is needed. The investigation should continue based on the current findings.
+    - `INSUFFICIENT_USELESS`: The information gathered in this round is irrelevant, redundant or has led to a dead end. A new strategy is needed, such as exploring different entities or query directions.
+
+### OUTPUT FORMAT
+Your output must follow this exact structure, with no additional commentary. Each key must be on a new line.
+
+Thought Process: Your step-by-step evaluation of relevance and redundancy, explaining what is new, what is missing, or why it failed.
+Extracted Content: A structured collection of key facts and promising new leads from the evidence. Structure the output with 'Direct Facts:' and 'Promising Leads:' if applicable. If the information is redundant or irrelevant, output "None".
+Judgment: SUFFICIENT, INSUFFICIENT_USEFUL, or INSUFFICIENT_USELESS.
+
+### YOUR RESPONSE:
+''')
+
+
 '''
     - `INSUFFICIENT_USELESS`: The information gathered in this round meets **any** of the following conditions:
         - **【+】(a) Irrelevant:** The information is irrelevant to the question.
@@ -188,9 +234,15 @@ def run_synthesis_and_judgment(question, analysis, notebook, current_queries, cu
         'entities': str(current_entities),
         'evidence_blocks': evidence_blocks
     }
+
+    if getattr(args, 'synthesis_method', 'extract_and_judgment') == 'evaluate_and_extract':
+        synthesis_prompt = prompt_evaluate_and_extract
+    else:
+        synthesis_prompt = prompt_extract_and_judgment
+
     synthesis_result = generate_process(
         step_name="Synthesize and Judge Evidence",
-        prompt_template=prompt_extract_and_judgment,
+        prompt_template=synthesis_prompt,
         template_inputs=template_inputs,
         parsing_function=parse_synthesis_and_judgment_result,
         args=args,

@@ -212,6 +212,10 @@ def parse_pruning_result(result_text: str, retrieved_facts_by_pid: dict):
             print("Parsing Error: Missing 'reasoning' or 'pruned_facts' keys in the root.")
             return None
         
+        # Ensure reasoning is a string (handle structured reasoning from thinking models)
+        if not isinstance(data["reasoning"], str):
+            data["reasoning"] = json.dumps(data["reasoning"], ensure_ascii=False)
+
         pruned_facts = data["pruned_facts"]
         # if not isinstance(pruned_facts, dict) or not all(k in pruned_facts for k in ["outgoing", "incoming"]):
         if not isinstance(pruned_facts, dict):
@@ -251,16 +255,27 @@ def parse_pruning_result(result_text: str, retrieved_facts_by_pid: dict):
             # 逐一检查保留的事实是否在正确的原始集合中
             for fact in kept_facts:
                 if fact not in valid_facts_for_direction:
-                    facts_list = list(valid_facts_for_direction)
-                    max_display_facts = 200
-                    if len(facts_list) > max_display_facts:
-                        display_facts = facts_list[:max_display_facts]
-                        remaining_count = len(facts_list) - max_display_facts
-                        valid_facts_str = f"{display_facts} ... ({remaining_count} more)"
-                    else:
-                        valid_facts_str = str(facts_list)
-                    print(f"Parsing Warning: LLM returned a fact '{fact}' for PID '{pid}' in the '{direction}' direction that was not in the original retrieved list. This is a hallucination. The valid facts for this direction are:\n{valid_facts_str}")
-                    return None
+                    # 尝试进行宽松匹配（忽略大小写和首尾空格）
+                    fact_lower = str(fact).strip().lower()
+                    matched = False
+                    for valid_fact in valid_facts_for_direction:
+                        if str(valid_fact).strip().lower() == fact_lower:
+                            # 替换为原始的正确格式
+                            kept_facts[kept_facts.index(fact)] = valid_fact
+                            matched = True
+                            break
+                    
+                    if not matched:
+                        facts_list = list(valid_facts_for_direction)
+                        max_display_facts = 120
+                        if len(facts_list) > max_display_facts:
+                            display_facts = facts_list[:max_display_facts]
+                            remaining_count = len(facts_list) - max_display_facts
+                            valid_facts_str = f"{display_facts} ... ({remaining_count} more)"
+                        else:
+                            valid_facts_str = str(facts_list)
+                        print(f"Parsing Warning: LLM returned a fact '{fact}' for PID '{pid}' in the '{direction}' direction that was not in the original retrieved list. This is a hallucination. The valid facts for this direction are:\n{valid_facts_str}")
+                        return None
                     
     # 4. If all checks pass, return the successfully parsed and validated data
     print("Successfully parsed and validated the pruned facts from LLM.")
@@ -278,7 +293,8 @@ def format_exploration_report(
     kept_facts_count: int,
     relation_selection_reasoning: str,
     fact_pruning_reasoning: str,
-    max_candidates_display: int = 4
+    max_candidates_display: int = 4,
+    verbose: bool = False
 ) -> str:
     """
     Generates the final, human-readable structured report string.
@@ -292,7 +308,7 @@ def format_exploration_report(
     linking_section.append(f'- Description: {linked_entity.get("description", "N/A")}')
     
     # 2.1 添加带截断的候选列表
-    if linked_candidates:
+    if verbose and linked_candidates:
         display_k = min(len(linked_candidates), max_candidates_display)
         linking_section.append(f'- Candidates (top-{display_k} preview):')
         for candidate in linked_candidates[:max_candidates_display]:
@@ -307,7 +323,9 @@ def format_exploration_report(
 
     # 2.2 添加链接理由
     rationale = linked_entity.get("analysis")
-    if rationale:
+    if verbose and rationale:
+        if not isinstance(rationale, str):
+            rationale = json.dumps(rationale, ensure_ascii=False)
         rationale_single_line = rationale.replace('\n', ' ')
         linking_section.append(f'- Linking Rationale: {rationale_single_line}')
     
@@ -333,24 +351,31 @@ def format_exploration_report(
     report_parts.append(format_section("Incoming", final_facts["incoming"]))
 
     # Add the summary
-    summary_section = [
-        "[Filtering Summary]",
-        f"- Relations explored: {selected_pids_count} of {total_relations_count} total",
-        f"- Facts kept: {kept_facts_count} of {total_facts_count} total"
-    ]
-    report_parts.append("\n".join(summary_section))
+    if verbose:
+        summary_section = [
+            "[Filtering Summary]",
+            f"- Relations explored: {selected_pids_count} of {total_relations_count} total",
+            f"- Facts kept: {kept_facts_count} of {total_facts_count} total"
+        ]
+        report_parts.append("\n".join(summary_section))
+        
+        # Add the reasoning section
+        # First, replace newlines to avoid f-string syntax errors and for cleaner output
+        # Handle cases where reasoning might be a dict or list (LLM structured output)
+        if not isinstance(relation_selection_reasoning, str):
+            relation_selection_reasoning = json.dumps(relation_selection_reasoning, ensure_ascii=False)
+        rel_reason_single_line = relation_selection_reasoning.replace('\n', ' ')
     
-    # Add the reasoning section
-    # First, replace newlines to avoid f-string syntax errors and for cleaner output
-    rel_reason_single_line = relation_selection_reasoning.replace('\n', ' ')
-    fact_reason_single_line = fact_pruning_reasoning.replace('\n', ' ')
-    
-    reasoning_section = [
-        "[Reasoning]",
-        f"- Relation Selection: {rel_reason_single_line}",
-        f"- Fact Pruning: {fact_reason_single_line}"
-    ]
-    report_parts.append("\n".join(reasoning_section))
+        if not isinstance(fact_pruning_reasoning, str):
+            fact_pruning_reasoning = json.dumps(fact_pruning_reasoning, ensure_ascii=False)
+        fact_reason_single_line = fact_pruning_reasoning.replace('\n', ' ')
+        
+        reasoning_section = [
+            "[Reasoning]",
+            f"- Relation Selection: {rel_reason_single_line}",
+            f"- Fact Pruning: {fact_reason_single_line}"
+        ]
+        report_parts.append("\n".join(reasoning_section))
     
     return "\n".join(report_parts)
 
@@ -393,7 +418,8 @@ def run_fact_retrieval_and_pruning(
             total_facts_count=0,
             kept_facts_count=0,
             relation_selection_reasoning=discovery_result.get('reasoning', 'No relations to select.'),
-            fact_pruning_reasoning="No facts to prune."
+            fact_pruning_reasoning="No facts to prune.",
+            verbose=getattr(args, 'kg_verbose_report', False)
         )
         return "SUCCESS", report
 
@@ -520,7 +546,8 @@ def run_fact_retrieval_and_pruning(
         total_facts_count=total_facts_count,
         kept_facts_count=kept_facts_count,
         relation_selection_reasoning=discovery_result.get('reasoning', 'N/A'),
-        fact_pruning_reasoning=pruning_result.get('reasoning', 'N/A')
+        fact_pruning_reasoning=pruning_result.get('reasoning', 'N/A'),
+        verbose=getattr(args, 'kg_verbose_report', False)
     )
 
     return "SUCCESS", final_report
