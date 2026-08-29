@@ -1,0 +1,7 @@
+# One XML-RPC Wikidata service URL per line. Edit these values for your setup.
+http://127.0.0.1:23150
+http://127.0.0.1:23151
+http://127.0.0.1:23152
+http://127.0.0.1:23153
+http://127.0.0.1:23154
+http://127.0.0.1:23155

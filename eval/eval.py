@@ -15,7 +15,6 @@ if __name__ == '__main__':
 
     parser.add_argument("--data_question_string", type=str,
                         default='question', help="key to access the question in output.")
-    parser.add_argument("--DoG", action='store_true', help="Indicate that the output file is from the DoG format.")
     args = parser.parse_args()
 
     # Determine the correct path to the results file
@@ -54,10 +53,7 @@ if __name__ == '__main__':
         origin_data_i = ground_truth_datas_question2id[cur_question]
         answers = align(args.dataset, question_string, data, ground_truth_datas, origin_data=ground_truth_datas[origin_data_i], data_question_string=data_question_string)
 
-        if args.DoG:
-            results = data.get('results', '')
-        else:
-            results = data.get('answer', '') # Use .get for safety
+        results = data.get('answer', '')
             
         if results is None:
             results = ''

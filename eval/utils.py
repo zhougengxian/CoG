@@ -89,10 +89,12 @@ def prepare_dataset_for_eval(dataset_name, output_file):
     with open(output_file, encoding='utf-8') as f:
         try:
             output_datas = json.load(f)
+            if isinstance(output_datas, dict):
+                output_datas = [output_datas]
         except json.JSONDecodeError:
             # Try reading as JSONL
             f.seek(0)
-            output_datas = [json.loads(line) for line in f]
+            output_datas = [json.loads(line) for line in f if line.strip()]
             
     return datas, question_string, output_datas
 
