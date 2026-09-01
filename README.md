@@ -3,8 +3,8 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-> **Note for Reviewers**: This repository is provided for anonymous peer review. 
-> Full documentation and author information will be disclosed upon acceptance.
+> 🎉 **News:** Our paper, *Cognition on Graph: Navigating Massive Knowledge Space via Cognitive Cycles and Bidirectional Graph-Text Synergy*, has been accepted to **EMNLP 2026**.
+> The camera-ready paper and official citation will be added when they become publicly available.
 
 CoG is a novel multi-hop question answering framework that synergistically combines structured knowledge graphs (Wikidata) and unstructured text (Wikipedia) through an iterative cognitive process of planning, exploration, and reflection. By leveraging bidirectional graph-text synergy, CoG navigates massive knowledge spaces to answer complex questions requiring multi-step reasoning.
 
@@ -142,6 +142,10 @@ CoG employs a cognitive reasoning cycle consisting of four main stages:
 2. **Wikipedia API Timeout**
    - System automatically retries failed questions (up to 3 times)
    - Use `--rerun_failed_only` to rerun failed questions
+
+## 📝 Citation
+
+Our paper has been accepted to EMNLP 2026. The authors are Gengxian Zhou, Jian Xu, Zichen Tang, Shiming Xiang, Haihong E, and Cheng-Lin Liu. The official BibTeX entry will be added when the camera-ready paper and proceedings metadata become publicly available.
 
 ## 📄 License
 

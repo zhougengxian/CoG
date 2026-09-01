@@ -297,6 +297,8 @@ def entity_search(entity_id, relation, wiki_client, head):
 
     if not entities_set:
         values = wiki_client.query_all("get_tail_values_given_head_and_relation", entity_id, rid_str)
+        if not isinstance(values, list):
+            values = []
         candidate_list = [{'name': name, 'id': '[FINISH_ID]'} for name in list(values)]
     else:
         candidate_list = []

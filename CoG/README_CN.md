@@ -205,7 +205,7 @@ results/
 
 ## 引用
 
-如果您使用了这个系统，请引用相关论文。
+我们的论文已被 EMNLP 2026 录用。作者为 Gengxian Zhou、Jian Xu、Zichen Tang、Shiming Xiang、Haihong E 和 Cheng-Lin Liu。Camera-ready 论文和会议论文集元数据公开后，本节将补充官方 BibTeX。
 
 ## 许可证
 

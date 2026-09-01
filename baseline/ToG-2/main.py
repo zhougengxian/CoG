@@ -242,9 +242,12 @@ def main_wiki_new(original_question, topic_entity, ground_truth, data_point, arg
                     print('Answer (CoT): ', answer)
                     return answer, search_entity_list, Total_Related_Senteces, [], end_mode, remark
                 else: # 有实体可继续拓展，更新主题实体为当前搜索到的实体
-                    topic_entity = {qid: topic for qid, topic in zip(entities_id,
-                                                                     [wiki_client.query_all("qid2label", entity).pop()
-                                                                      for entity in entities_id])}
+                    next_entity_ids = set(entities_id)
+                    topic_entity = {
+                        candidate['id']: candidate['name']
+                        for candidate in sorted_entity_list
+                        if candidate['id'] in next_entity_ids
+                    }
                     continue
         else:
             remark = 'Last situation topic entity rank list in empty in depth {}, generate_only_with llm.'.format(depth)

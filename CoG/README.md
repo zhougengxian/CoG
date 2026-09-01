@@ -212,7 +212,7 @@ Contains overall statistical data:
 
 ## Citation
 
-If you use this system, please cite the relevant paper.
+Our paper has been accepted to EMNLP 2026. The authors are Gengxian Zhou, Jian Xu, Zichen Tang, Shiming Xiang, Haihong E, and Cheng-Lin Liu. The official BibTeX entry will be added when the camera-ready paper and proceedings metadata become publicly available.
 
 ## License
 
