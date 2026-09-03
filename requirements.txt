@@ -21,3 +21,4 @@ tabulate
 httpx[socks]
 python-dotenv
 psutil
+faiss-gpu

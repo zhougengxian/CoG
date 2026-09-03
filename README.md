@@ -57,6 +57,8 @@ cd CoGOnGraph
 pip install -r requirements.txt
 ```
 
+If `faiss-gpu` fails to install with pip or `uv`, see the [Wikidata FAISS setup](Wikidata/README.md#recommended-faiss-environment) for the Conda-based workaround. GPU FAISS is only needed to accelerate index construction; serving can use `faiss-cpu`.
+
 ### 2. Deploy Wikidata Service
 
 Before running experiments, you need to deploy the Wikidata query service. See detailed instructions in [`Wikidata/README.md`](Wikidata/README.md).

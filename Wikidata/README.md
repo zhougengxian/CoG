@@ -33,6 +33,7 @@ This will install all necessary packages including:
 - `torch`, `transformers`, `sentence-transformers` - For embedding models
 - `redis` - For in-memory database
 
+> If `faiss-gpu` fails to install with pip or `uv`, use the [dedicated Conda setup](#recommended-faiss-environment) in Step 3.
 
 ## Downloading the dump
 
@@ -215,27 +216,22 @@ python -m simple_wikidata_db.db_deploy.merge_degrees \
 
 The vector index is used for fuzzy entity recall in the entity linking process when exact label and alias matching fail. Build it using `simple_wikidata_db/db_deploy/build_vector_index.py`.
 
-Environment Setup Recommendation:
-If you want to use faiss gpu version, **it is highly recommended to create a separate Python environment for this step** because FAISS GPU version may have compatibility issues with other packages.
+### Recommended FAISS Environment
 
-**Create a separate conda environment for FAISS GPU:**
+GPU FAISS speeds up index construction, but pip/uv may not provide compatible wheels for some Python versions (see [facebookresearch/faiss#4510](https://github.com/facebookresearch/faiss/issues/4510)). If installation fails, build the index in a dedicated Conda environment:
 
 ```bash
-# Create a new conda environment with Python 3.11
 conda create -n faiss python=3.11 -y
-
-# Activate the environment
 conda activate faiss
-
-# Install FAISS GPU version
 conda install pytorch::faiss-gpu -y
 
-# Install project dependencies
+# Install the remaining dependencies without resolving faiss-gpu again
 cd CoGOnGraph
-pip install -r requirements.txt
+grep -v '^faiss-gpu$' requirements.txt > /tmp/cog-requirements-no-faiss.txt
+pip install -r /tmp/cog-requirements-no-faiss.txt
 ```
 
-After building the vector index, you can switch back to your main environment for running the query servers.
+Afterward, you can switch back to the main environment for running the query servers. Only the final query server, which loads the vector index, requires FAISS, and `faiss-cpu` is sufficient.
 
 ### Building the Index
 
@@ -339,7 +335,7 @@ python -m simple_wikidata_db.db_deploy.server \
 
 **Important Notes:**
 - The first server (chunk_number=0) loads global data (labels, property labels, relation degrees)
-- The last server (chunk_number=num_chunks-1) loads the vector index for semantic search functionality
+- The last server (chunk_number=num_chunks-1) loads the vector index and requires FAISS; `faiss-cpu` is sufficient
 - Each server process should use a different server port (via `--port`) and a different Redis database number (via `--redis_db`)
 - Use `--flush_redis` on first run or when data is updated
 - Make sure the vector index files exist before starting the last server, otherwise semantic search will fail
