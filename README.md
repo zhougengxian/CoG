@@ -2,9 +2,12 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![arXiv](https://img.shields.io/badge/arXiv-2609.12791-b31b1b.svg)](https://arxiv.org/abs/2609.12791)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Dataset-yellow.svg)](https://huggingface.co/datasets/zhougengxian/CoG-Evaluation-Data)
 
-> 🎉 **News:** Our paper, *Cognition on Graph: Navigating Massive Knowledge Space via Cognitive Cycles and Bidirectional Graph-Text Synergy*, has been accepted to **EMNLP 2026**.
-> The camera-ready paper and official citation will be added when they become publicly available.
+> 🎉 **News:** Our paper, *Cognition on Graph: Navigating Massive Knowledge Space via Cognitive Cycles and Bidirectional Graph-Text Synergy*, has been accepted to **EMNLP 2026**.  
+> 📄 **Preprint:** [arXiv:2609.12791](https://arxiv.org/abs/2609.12791)  
+> 🤗 **Evaluation Data:** [CoG-Evaluation-Data on Hugging Face](https://huggingface.co/datasets/zhougengxian/CoG-Evaluation-Data)
 
 CoG is a novel multi-hop question answering framework that synergistically combines structured knowledge graphs (Wikidata) and unstructured text (Wikipedia) through an iterative cognitive process of planning, exploration, and reflection. By leveraging bidirectional graph-text synergy, CoG navigates massive knowledge spaces to answer complex questions requiring multi-step reasoning.
 
@@ -94,6 +97,12 @@ For detailed evaluation instructions, see [`eval/README.md`](eval/README.md).
 
 ## 📊 Supported Datasets
 
+### Evaluation Data on Hugging Face
+
+The evaluation data associated with CoG are publicly available on Hugging Face:
+
+**[zhougengxian/CoG-Evaluation-Data](https://huggingface.co/datasets/zhougengxian/CoG-Evaluation-Data)**
+
 CoG supports the following benchmark datasets:
 
 | Dataset | Parameter | Description |
@@ -147,7 +156,21 @@ CoG employs a cognitive reasoning cycle consisting of four main stages:
 
 ## 📝 Citation
 
-Our paper has been accepted to EMNLP 2026. The authors are Gengxian Zhou, Jian Xu, Zichen Tang, Shiming Xiang, Haihong E, and Cheng-Lin Liu. The official BibTeX entry will be added when the camera-ready paper and proceedings metadata become publicly available.
+Our paper has been accepted to **EMNLP 2026**, and the preprint is available on [arXiv](https://arxiv.org/abs/2609.12791). If you find this work useful, please cite:
+
+```bibtex
+@misc{zhou2026cognitiongraphnavigatingmassive,
+      title={Cognition on Graph: Navigating Massive Knowledge Space via Cognitive Cycles and Bidirectional Graph-Text Synergy},
+      author={Gengxian Zhou and Jian Xu and Zichen Tang and Shiming Xiang and Haihong E and Cheng-Lin Liu},
+      year={2026},
+      eprint={2609.12791},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2609.12791},
+}
+```
+
+The citation will be updated with the official EMNLP 2026 proceedings metadata once it becomes available.
 
 ## 📄 License
 
