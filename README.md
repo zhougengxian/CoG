@@ -3,10 +3,12 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![arXiv](https://img.shields.io/badge/arXiv-2609.12791-b31b1b.svg)](https://arxiv.org/abs/2609.12791)
+[![Poster](https://img.shields.io/badge/EMNLP%202026-Poster-orange.svg)](assets/CoG_EMNLP2026_Poster.pdf)
 [![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Dataset-yellow.svg)](https://huggingface.co/datasets/zhougengxian/CoG-Evaluation-Data)
 
 > 🎉 **News:** Our paper, *Cognition on Graph: Navigating Massive Knowledge Space via Cognitive Cycles and Bidirectional Graph-Text Synergy*, has been accepted to **EMNLP 2026**.  
 > 📄 **Preprint:** [arXiv:2609.12791](https://arxiv.org/abs/2609.12791)  
+> 🖼️ **Poster:** [EMNLP 2026 poster (A0 PDF)](assets/CoG_EMNLP2026_Poster.pdf)<br>
 > 🤗 **Evaluation Data:** [CoG-Evaluation-Data on Hugging Face](https://huggingface.co/datasets/zhougengxian/CoG-Evaluation-Data)
 
 CoG is a novel multi-hop question answering framework that synergistically combines structured knowledge graphs (Wikidata) and unstructured text (Wikipedia) through an iterative cognitive process of planning, exploration, and reflection. By leveraging bidirectional graph-text synergy, CoG navigates massive knowledge spaces to answer complex questions requiring multi-step reasoning.
